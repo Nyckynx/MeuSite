@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconhecimento Facial (ML) e Mini-Game</title>
+    <title>Postura Inteligente: Correção em Tempo Real & Snake Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -202,11 +202,11 @@
 </head>
 <body>
 
-    <h1>🧠 Reconhecimento Facial ML & Snake Game 🐍</h1>
+    <h1>Postura Inteligente: Correção em Tempo Real & Snake Game 🐍</h1>
 
     <div class="main-wrapper">
         <section class="face-recognition-module">
-            <h2>Máquina de Aprendizado (Teachable Machine)</h2>
+            <h2>Análise Postural com Teachable Machine</h2>
             
             <div id="model-controls">
                 <button type="button" id="start-button" onclick="init()">Iniciar Câmera</button>
@@ -409,16 +409,15 @@
             resetGame();
         }
 
-        // Captura de Teclas (CORREÇÃO APLICADA AQUI!)
+        // Captura de Teclas (Correção para impedir o scroll da página)
         document.addEventListener('keydown', e => {
-            // Lista das teclas que queremos desativar o scroll padrão
             const keyCodes = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
             
             if (keyCodes.includes(e.key)) {
-                e.preventDefault(); // <-- ISSO IMPEDE O SCROLL DA PÁGINA!
+                e.preventDefault(); 
             }
             
-            // Lógica de movimento da cobrinha (mantida)
+            // Lógica de movimento da cobrinha 
             switch (e.key) {
                 case 'ArrowUp':
                     if (yVelocity === 1) return;

@@ -3,113 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconhecimento Facial com Teachable Machine</title>
+    <title>Reconhecimento Facial (ML) e Mini-Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Estilos básicos para o corpo da página */
+        /* Estilos globais e reset */
+        :root {
+            --primary-color: #ff6b6b; /* Vermelho-coral moderno */
+            --secondary-color: #48dbfb; /* Azul claro vibrante */
+            --background-dark: #2c3e50; /* Azul escuro quase preto */
+            --background-light: #ecf0f1; /* Cinza claro */
+            --text-light: #ffffff;
+            --text-dark: #34495e;
+            --button-start: #2ecc71; /* Verde esmeralda */
+            --button-pause: #f1c40f; /* Amarelo ouro */
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background: var(--background-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 10px;
+            min-height: 100vh;
         }
 
-        /* Container principal para semântica e centralização */
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+        /* Layout principal: Container centralizado com os dois módulos (ML e Game) */
+        .main-wrapper {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 20px;
         }
 
-        /* Título do Conteúdo */
+        /* Estilo comum para as caixas de módulos */
+        .module-box {
+            background-color: #34495e; /* Fundo do container */
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .module-box:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 1. Módulo de Reconhecimento Facial */
+        .face-recognition-module {
+            flex: 2; /* Ocupa mais espaço */
+            min-width: 400px;
+        }
+
+        /* 2. Módulo do Jogo da Cobrinha */
+        .snake-game-module {
+            flex: 1; /* Ocupa menos espaço */
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Títulos */
         h1 {
-            color: #007bff;
+            color: var(--primary-color);
             text-align: center;
-            border-bottom: 2px solid #007bff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary-color);
             padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Controles (Botões) */
+        #model-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
-        /* Estilo para os botões */
         button {
-            padding: 10px 15px;
-            margin: 5px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px; /* Botões arredondados */
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         #start-button {
-            background-color: #28a745; /* Verde para iniciar */
-            color: white;
+            background-color: var(--button-start);
+            color: var(--text-light);
         }
 
-        #start-button:hover {
-            background-color: #218838;
+        #start-button:hover:not(:disabled) {
+            background-color: #27ae60;
+            transform: scale(1.05);
         }
 
         #pause-button {
-            background-color: #ffc107; /* Amarelo para pausar */
-            color: #333;
+            background-color: var(--button-pause);
+            color: var(--text-dark);
         }
 
-        #pause-button:hover {
-            background-color: #e0a800;
+        #pause-button:hover:not(:disabled) {
+            background-color: #f39c12;
+            transform: scale(1.05);
         }
 
-        /* Contêiner da Webcam e Rótulos */
-        #webcam-container, #label-container {
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Webcam e Rótulos */
+        #webcam-container {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
-            min-height: 50px; /* Garante espaço inicial */
+            margin-bottom: 20px;
+        }
+
+        #webcam-container canvas {
+            border-radius: 8px;
+            border: 4px solid var(--secondary-color);
+            box-shadow: 0 0 15px rgba(72, 219, 251, 0.5); /* Efeito neon */
+        }
+
+        #label-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-height: 50px;
         }
 
         #label-container div {
-            padding: 5px 10px;
-            margin: 5px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            font-weight: bold;
+            width: 80%;
+            text-align: center;
+            padding: 10px 15px;
+            background-color: #3f5872;
+            border-radius: 6px;
+            font-weight: 700;
+            color: var(--text-light);
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        /* -------------------------------------- */
+        /* Estilos para o Jogo da Cobrinha */
+        /* -------------------------------------- */
+        .game-info {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        #snake-canvas {
+            border: 5px solid var(--button-start);
+            border-radius: 8px;
+            background-color: #222d3a;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
+        }
+
+        .game-controls-tip {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            .main-wrapper {
+                flex-direction: column;
+            }
+            .snake-game-module {
+                margin-top: 30px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header class="container">
-        <h1>Reconhecimento Facial com Teachable Machine</h1>
-    </header>
+    <h1>🧠 Reconhecimento Facial ML & Snake Game 🐍</h1>
 
-    <main class="container">
-        <section id="model-controls">
-            <button type="button" id="start-button" onclick="init()">Iniciar Câmera</button>
-            <button type="button" id="pause-button" onclick="togglePause()" disabled>Pausar Câmera</button>
+    <div class="main-wrapper">
+        <section class="face-recognition-module">
+            <h2>Máquina de Aprendizado (Teachable Machine)</h2>
+            
+            <div id="model-controls">
+                <button type="button" id="start-button" onclick="init()">Iniciar Câmera</button>
+                <button type="button" id="pause-button" onclick="togglePause()" disabled>Pausar Câmera</button>
+            </div>
+            
+            <figure id="webcam-container"></figure>
+            <output id="label-container"></output>
         </section>
-        
-        <figure id="webcam-container"></figure>
 
-        <output id="label-container"></output>
-    </main>
+        <aside class="snake-game-module">
+            <h2>Mini-Game: Snake!</h2>
+            <div class="game-info">
+                <span>Pontuação: <span id="score">0</span></span>
+                <span>Recorde: <span id="high-score">0</span></span>
+            </div>
+            <canvas id="snake-canvas" width="300" height="300"></canvas>
+            <p class="game-controls-tip">Use as setas (↑ ↓ ← →) para jogar!</p>
+        </aside>
+
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    
     <script type="text/javascript">
-        // -----------------------------------------------------------
-        // SEÇÃO MANTIDA ORIGINALMENTE (Com uma pequena adição para o PAUSE)
-        // -----------------------------------------------------------
-
         const URL = "./my_model/";
         let model, webcam, labelContainer, maxPredictions;
-        let isPaused = false; // Estado de pausa
+        let isPaused = false; 
 
-        // Load the image model and setup the webcam
         async function init() {
-            // Desabilita o botão Iniciar e habilita o Pausar
             document.getElementById("start-button").disabled = true;
             document.getElementById("pause-button").disabled = false;
             
@@ -119,63 +247,194 @@
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Convenience function to setup a webcam
-            const flip = true; // whether to flip the webcam
-            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-            await webcam.setup(); // request access to the webcam
+            const flip = true; 
+            webcam = new tmImage.Webcam(200, 200, flip); 
+            await webcam.setup(); 
             await webcam.play();
             window.requestAnimationFrame(loop);
 
-            // append elements to the DOM
             document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) { // and class labels
+            for (let i = 0; i < maxPredictions; i++) { 
                 labelContainer.appendChild(document.createElement("div"));
             }
         }
 
         async function loop() {
-            if (!isPaused) { // Adição para o PAUSE
-                webcam.update(); // update the webcam frame
+            if (webcam && !isPaused) { 
+                webcam.update(); 
                 await predict();
             }
             window.requestAnimationFrame(loop);
         }
 
-        // run the webcam image through the image model
         async function predict() {
-            // predict can take in an image, video or canvas html element
             const prediction = await model.predict(webcam.canvas);
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction =
-                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                    prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(1) + "%";
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
         }
 
-        // -----------------------------------------------------------
-        // NOVA FUNÇÃO PARA PAUSAR/RETOMAR
-        // -----------------------------------------------------------
         function togglePause() {
             isPaused = !isPaused;
             const pauseButton = document.getElementById("pause-button");
             if (isPaused) {
-                webcam.pause(); // Pausa o stream de vídeo da webcam
+                webcam.pause(); 
                 pauseButton.textContent = "Retomar Câmera";
-                // Limpa os resultados ao pausar
                 for (let i = 0; i < maxPredictions; i++) { 
-                    labelContainer.childNodes[i].innerHTML = "PAUSADO";
+                    labelContainer.childNodes[i].innerHTML = "MODELO PAUSADO";
                 }
             } else {
-                webcam.play(); // Retoma o stream de vídeo
+                webcam.play(); 
                 pauseButton.textContent = "Pausar Câmera";
             }
         }
-
-        // -----------------------------------------------------------
-        // FIM DA SEÇÃO MANTIDA ORIGINALMENTE
-        // -----------------------------------------------------------
     </script>
- 
+
+    <script type="text/javascript">
+        const canvas = document.getElementById('snake-canvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('high-score');
+
+        const gridSize = 20; // Tamanho de cada célula (bloco)
+        const tileCount = canvas.width / gridSize;
+        let snake = [];
+        let food = {};
+        let xVelocity = 0;
+        let yVelocity = 0;
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+
+        highScoreElement.textContent = highScore;
+
+        // Inicializa a cobra
+        function resetGame() {
+            snake = [{x: 10, y: 10}]; // Posição inicial no grid
+            xVelocity = 0;
+            yVelocity = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            placeFood();
+        }
+
+        // Posiciona a comida em um local aleatório que não seja a cobra
+        function placeFood() {
+            food.x = Math.floor(Math.random() * tileCount);
+            food.y = Math.floor(Math.random() * tileCount);
+
+            // Verifica se a comida colidiu com a cobra
+            for (let i = 0; i < snake.length; i++) {
+                if (snake[i].x === food.x && snake[i].y === food.y) {
+                    placeFood(); // Tenta de novo se colidir
+                    return;
+                }
+            }
+        }
+
+        // Lógica principal do jogo
+        function gameLoop() {
+            // Atualiza a posição da cabeça da cobra
+            let head = {x: snake[0].x + xVelocity, y: snake[0].y + yVelocity};
+
+            // 1. Verifica Colisões com as Paredes
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                gameOver();
+                return;
+            }
+
+            // 2. Verifica Colisões com o Próprio Corpo
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            // Se o jogo não está parado e o movimento começou (cobrinha não parada)
+            if (xVelocity !== 0 || yVelocity !== 0) {
+                snake.unshift(head); // Adiciona a nova cabeça
+
+                // 3. Verifica se Comeu a Comida
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    scoreElement.textContent = score;
+                    placeFood(); // Gera nova comida
+                    // A cobra cresce naturalmente, pois não removemos a cauda (pop)
+                } else {
+                    snake.pop(); // Remove a cauda para simular o movimento
+                }
+            }
+            
+            drawGame();
+        }
+
+        // Função para desenhar o jogo
+        function drawGame() {
+            // Limpa o Canvas
+            ctx.fillStyle = '#222d3a'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha a Comida
+            ctx.fillStyle = varColor('primary-color');
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
+
+            // Desenha a Cobra
+            ctx.fillStyle = varColor('button-start');
+            snake.forEach(part => {
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
+            });
+        }
+        
+        // Função utilitária para pegar cores do CSS
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`);
+        }
+
+
+        // Game Over
+        function gameOver() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('snakeHighScore', highScore);
+                highScoreElement.textContent = highScore;
+            }
+            alert(`Fim de Jogo! Pontuação: ${score}. Pressione OK para reiniciar.`);
+            resetGame();
+        }
+
+        // Captura de Teclas
+        document.addEventListener('keydown', e => {
+            // Impede a mudança de direção oposta (Ex: Cima -> Baixo)
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (yVelocity === 1) return;
+                    xVelocity = 0;
+                    yVelocity = -1;
+                    break;
+                case 'ArrowDown':
+                    if (yVelocity === -1) return;
+                    xVelocity = 0;
+                    yVelocity = 1;
+                    break;
+                case 'ArrowLeft':
+                    if (xVelocity === 1) return;
+                    xVelocity = -1;
+                    yVelocity = 0;
+                    break;
+                case 'ArrowRight':
+                    if (xVelocity === -1) return;
+                    xVelocity = 1;
+                    yVelocity = 0;
+                    break;
+            }
+        });
+
+        // Inicia o Jogo
+        resetGame();
+        setInterval(gameLoop, 150); // Velocidade do jogo
+    </script>
 </body>
 </html>

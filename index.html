@@ -336,6 +336,12 @@
 
         // Lógica principal do jogo
         function gameLoop() {
+            // Se a cobrinha não começou a se mover, não atualiza a posição
+            if (xVelocity === 0 && yVelocity === 0 && snake.length === 1) {
+                drawGame();
+                return;
+            }
+
             // Atualiza a posição da cabeça da cobra
             let head = {x: snake[0].x + xVelocity, y: snake[0].y + yVelocity};
 
@@ -353,19 +359,17 @@
                 }
             }
 
-            // Se o jogo não está parado e o movimento começou (cobrinha não parada)
-            if (xVelocity !== 0 || yVelocity !== 0) {
-                snake.unshift(head); // Adiciona a nova cabeça
+            // Adiciona a nova cabeça
+            snake.unshift(head); 
 
-                // 3. Verifica se Comeu a Comida
-                if (head.x === food.x && head.y === food.y) {
-                    score++;
-                    scoreElement.textContent = score;
-                    placeFood(); // Gera nova comida
-                    // A cobra cresce naturalmente, pois não removemos a cauda (pop)
-                } else {
-                    snake.pop(); // Remove a cauda para simular o movimento
-                }
+            // 3. Verifica se Comeu a Comida
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreElement.textContent = score;
+                placeFood(); // Gera nova comida
+                // A cobra cresce naturalmente, pois não removemos a cauda (pop)
+            } else {
+                snake.pop(); // Remove a cauda para simular o movimento
             }
             
             drawGame();
@@ -405,9 +409,16 @@
             resetGame();
         }
 
-        // Captura de Teclas
+        // Captura de Teclas (CORREÇÃO APLICADA AQUI!)
         document.addEventListener('keydown', e => {
-            // Impede a mudança de direção oposta (Ex: Cima -> Baixo)
+            // Lista das teclas que queremos desativar o scroll padrão
+            const keyCodes = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+            
+            if (keyCodes.includes(e.key)) {
+                e.preventDefault(); // <-- ISSO IMPEDE O SCROLL DA PÁGINA!
+            }
+            
+            // Lógica de movimento da cobrinha (mantida)
             switch (e.key) {
                 case 'ArrowUp':
                     if (yVelocity === 1) return;
